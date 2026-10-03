@@ -2,7 +2,7 @@
 FROM alpine:3.21
 
 LABEL org.opencontainers.image.title="seleimend-db-backup" \
-      org.opencontainers.image.description="PostgreSQL streaming backup to Backblaze B2 via S3-compatible API" \
+      org.opencontainers.image.description="Enterprise-ready containerized PostgreSQL streaming backup agent for Backblaze B2 (S3-compatible)" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.authors="Seleimend" \
       org.opencontainers.image.source="https://github.com/victorseleimend293/seleimend-db-backup"

@@ -235,3 +235,15 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Update Docker Hub Description and Overview
+        if: env.DOCKERHUB_USERNAME != ''
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_REPO || format('{0}/seleimend-db-backup', env.DOCKERHUB_USERNAME) }}
+          short-description: Enterprise-ready containerized PostgreSQL streaming backup agent for Backblaze B2
+          readme-filepath: ./README.md
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

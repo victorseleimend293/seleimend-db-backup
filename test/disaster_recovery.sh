@@ -45,7 +45,7 @@ echo "==> Starting MinIO S3-compatible container (${MINIO_CONTAINER})..."
 docker run -d --name "${MINIO_CONTAINER}" --network "${NETWORK_NAME}" \
   -e MINIO_ROOT_USER=minioadmin \
   -e MINIO_ROOT_PASSWORD=miniopassword \
-  minio/minio:latest server /data
+  cgr.dev/chainguard/minio:latest server /tmp/data
 
 echo "==> Waiting for PostgreSQL to become ready..."
 for _ in {1..30}; do
@@ -57,10 +57,9 @@ done
 
 echo "==> Waiting for MinIO to become ready..."
 for _ in {1..30}; do
-  if docker run --rm --network "${NETWORK_NAME}" \
-    -e AWS_ACCESS_KEY_ID=minioadmin \
-    -e AWS_SECRET_ACCESS_KEY=miniopassword \
-    amazon/aws-cli:latest --endpoint-url "http://${MINIO_CONTAINER}:9000" s3 mb s3://local-dr-bucket > /dev/null 2>&1; then
+  if docker exec "${MINIO_CONTAINER}" mc ready local > /dev/null 2>&1; then
+    docker exec "${MINIO_CONTAINER}" mc alias set myminio http://localhost:9000 minioadmin miniopassword > /dev/null 2>&1
+    docker exec "${MINIO_CONTAINER}" mc mb myminio/local-dr-bucket > /dev/null 2>&1
     break
   fi
   sleep 1

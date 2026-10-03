@@ -28,9 +28,9 @@ resource "b2_bucket" "backup_bucket" {
 
 # Optional scoped Application Key (for standalone provisioning)
 resource "b2_application_key" "backup_agent_key" {
-  count     = var.create_app_key ? 1 : 0
-  key_name  = var.app_key_name
-  bucket_id = b2_bucket.backup_bucket.bucket_id
+  count      = var.create_app_key ? 1 : 0
+  key_name   = var.app_key_name
+  bucket_ids = [b2_bucket.backup_bucket.bucket_id]
 
   capabilities = [
     "listBuckets",

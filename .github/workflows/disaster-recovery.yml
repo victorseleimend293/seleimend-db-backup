@@ -35,18 +35,18 @@ jobs:
           --health-retries 5
 
       minio:
-        image: minio/minio:latest
+        image: cgr.dev/chainguard/minio:latest
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: miniopassword
         ports:
           - 9000:9000
         options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-cmd "mc ready local"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
-        command: server /data
+        command: server /tmp/data
 
     steps:
       - name: Checkout repository
