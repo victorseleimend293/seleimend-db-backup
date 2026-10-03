@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## <small>1.0.1 (2026-10-03)</small>
+
+* fix(ci): point GitGuardian action to ggshield-action repository ([012a1a5](https://github.com/victorseleimend293/seleimend-db-backup/commit/012a1a5))
+* ci(security): add GitGuardian secret scanning and consolidate changelog ([46c15c6](https://github.com/victorseleimend293/seleimend-db-backup/commit/46c15c6))
+
 ## 1.0.0 (2026-10-03)
 
 ### Features
