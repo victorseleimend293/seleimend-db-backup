@@ -286,9 +286,10 @@ The GitHub Actions CI/CD pipeline triggers on pushes to `main` and version tags 
 
 1. **Lint & Code Style**: Runs ShellCheck and Prettier verification.
 2. **Unit Tests & 100% Coverage**: Executes Bats test suite and asserts 100% code coverage.
-3. **Docker Build & Smoke Tests**: Builds multi-arch container image and tests runtime binaries.
-4. **Semantic Release**: Calculates semantic version (`patch`, `minor`, `major`), updates [`CHANGELOG.md`](CHANGELOG.md), and creates GitHub release tags.
-5. **Publish to GHCR**: Automatically pushes multi-arch images (`linux/amd64`, `linux/arm64`) to GitHub Container Registry tagged with the semantic version, major/minor tags, and `latest`.
+3. **Secret Scanning**: Runs GitGuardian (`ggshield`) to prevent credentials, tokens, and sensitive keys from being committed.
+4. **Docker Build & Smoke Tests**: Builds multi-arch container image and tests runtime binaries.
+5. **Semantic Release**: Calculates semantic version (`patch`, `minor`, `major`), updates [`CHANGELOG.md`](CHANGELOG.md), and creates GitHub release tags.
+6. **Publish to GHCR**: Automatically pushes multi-arch images (`linux/amd64`, `linux/arm64`) to GitHub Container Registry tagged with the semantic version, major/minor tags, and `latest`.
 
 ---
 

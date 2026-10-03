@@ -78,10 +78,31 @@ jobs:
           name: coverage-report
           path: coverage/
 
+  gitguardian-scan:
+    name: GitGuardian Secret Scanning
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run GitGuardian Scan
+        uses: GitGuardian/ggshield/actions/secret@v1
+        env:
+          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
   build-and-test:
     name: Build Docker Image & Smoke Test
     runs-on: ubuntu-latest
-    needs: [lint-and-validate, unit-tests-and-coverage]
+    needs: [lint-and-validate, unit-tests-and-coverage, gitguardian-scan]
+    if: '!failure() && !cancelled()'
     permissions:
       contents: read
     steps:
