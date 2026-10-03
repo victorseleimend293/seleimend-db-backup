@@ -1,2 +1,4 @@
+[ "$CI" = "true" ] || [ "$HUSKY" = "0" ] && exit 0
+
 pnpm run lint
 pnpm test

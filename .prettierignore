@@ -8,3 +8,4 @@ test/coverage/
 Dockerfile
 package-lock.json
 pnpm-lock.yaml
+CHANGELOG.md
