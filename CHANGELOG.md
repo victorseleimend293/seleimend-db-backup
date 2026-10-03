@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## 1.1.0 (2026-10-03)
+
+* feat(dr): add disaster recovery drills, b2 terraform and unified deployment ([56f49e4](https://github.com/victorseleimend293/seleimend-db-backup/commit/56f49e4))
+
 ## <small>1.0.1 (2026-10-03)</small>
 
 * fix(ci): point GitGuardian action to ggshield-action repository ([012a1a5](https://github.com/victorseleimend293/seleimend-db-backup/commit/012a1a5))
