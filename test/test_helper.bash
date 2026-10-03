@@ -32,6 +32,8 @@ setup_test_sandbox() {
   create_mock "aws" 0 "mock_aws_output"
   create_mock "curl" 0 ""
   create_mock "supercronic" 0 "mock_supercronic_running"
+  create_mock "psql" 0 "1"
+  create_mock "terraform" 0 "Apply complete! Resources: 1 added, 0 changed, 0 destroyed."
 }
 
 teardown_test_sandbox() {

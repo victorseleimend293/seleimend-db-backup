@@ -34,6 +34,16 @@ teardown() {
   assert_output --partial "Available snapshots in s3://test-bucket/backups/test/:"
 }
 
+@test "entrypoint: dispatches 'dr-test' and 'test-dr' to dr_test.sh" {
+  run "${REPO_ROOT}/scripts/entrypoint.sh" dr-test --help
+  assert_failure 1
+  assert_output --partial "Usage: dr_test.sh [OPTIONS]"
+
+  run "${REPO_ROOT}/scripts/entrypoint.sh" test-dr --help
+  assert_failure 1
+  assert_output --partial "Usage: dr_test.sh [OPTIONS]"
+}
+
 @test "entrypoint: dispatches arbitrary commands directly" {
   run "${REPO_ROOT}/scripts/entrypoint.sh" echo "custom command executed"
   assert_success
@@ -48,7 +58,7 @@ teardown() {
 
   run "${REPO_ROOT}/scripts/entrypoint.sh"
   assert_success
-  assert_output --partial "CRON_SCHEDULE is defined: '*/15 * * * *'"
+  assert_output --partial "Configuring backup schedule: '*/15 * * * *'"
   assert_output --partial "Initializing supercronic daemon mode..."
   assert_output --partial "Starting supercronic with crontab:"
   assert_output --partial "*/15 * * * * ${REPO_ROOT}/scripts/backup.sh"
@@ -57,15 +67,30 @@ teardown() {
   assert_output --partial "/tmp/crontab"
 }
 
-# ------------------------------------------------------------------------------
-# Default mode tests
-# ------------------------------------------------------------------------------
-@test "entrypoint: defaults to single backup execution when no CRON_SCHEDULE specified" {
-  unset CRON_SCHEDULE
+@test "entrypoint: starts supercronic daemon when DR_SCHEDULE is set" {
+  export DR_SCHEDULE="0 4 * * 0"
 
   run "${REPO_ROOT}/scripts/entrypoint.sh"
   assert_success
-  assert_output --partial "No CRON_SCHEDULE specified. Running single backup execution..."
+  assert_output --partial "Configuring disaster recovery drill schedule: '0 4 * * 0'"
+  assert_output --partial "Initializing supercronic daemon mode..."
+  assert_output --partial "Starting supercronic with crontab:"
+  assert_output --partial "0 4 * * 0 ${REPO_ROOT}/scripts/dr_test.sh"
+
+  run cat "${TEST_TMP_DIR}/supercronic.log"
+  assert_output --partial "/tmp/crontab"
+}
+
+# ------------------------------------------------------------------------------
+# Default mode tests
+# ------------------------------------------------------------------------------
+@test "entrypoint: defaults to single backup execution when no schedule specified" {
+  unset CRON_SCHEDULE
+  unset DR_SCHEDULE
+
+  run "${REPO_ROOT}/scripts/entrypoint.sh"
+  assert_success
+  assert_output --partial "No schedule specified. Running single backup execution..."
   assert_output --partial "Starting database backup procedure..."
   assert_output --partial "Successfully backed up app_production"
 }

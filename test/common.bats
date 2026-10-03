@@ -73,6 +73,14 @@ teardown() {
   assert_success
 }
 
+@test "common: notify_healthcheck supports custom target url" {
+  unset HEALTHCHECK_URL
+  notify_healthcheck "start" "" "https://hc-ping.com/custom-dr-url"
+  run cat "${TEST_TMP_DIR}/curl.log"
+  assert_output --partial "https://hc-ping.com/custom-dr-url/start"
+}
+
+
 # ------------------------------------------------------------------------------
 # B2 configuration tests
 # ------------------------------------------------------------------------------

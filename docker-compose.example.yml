@@ -23,8 +23,11 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # Daemon mode: run cron every night at 2:00 AM UTC
+      # Daemon mode: daily backup at 2:00 AM UTC
       CRON_SCHEDULE: '0 2 * * *'
+
+      # Automated disaster recovery drill schedule (e.g. weekly on Sunday at 4:00 AM UTC)
+      DR_SCHEDULE: '0 4 * * 0'
 
       # Database connection
       DATABASE_URL: 'postgresql://seleimend_user:secret_password@postgres:5432/app_database'
@@ -35,7 +38,14 @@ services:
       B2_APPLICATION_KEY: '${B2_APPLICATION_KEY}'
       B2_BUCKET: '${B2_BUCKET}'
       B2_PREFIX: 'compose-dev/postgres'
+
+      # Storage-level retention in days (auto-provisioned via B2 Lifecycle Rules)
       RETENTION_DAYS: '14'
+
+      # Required verification query for automated disaster recovery drills
+      DR_VERIFY_QUERY: "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';"
+
+      # Unified healthcheck webhook for both backups and DR drills (e.g. healthchecks.io)
       # HEALTHCHECK_URL: "https://hc-ping.com/your-uuid"
 
 volumes:

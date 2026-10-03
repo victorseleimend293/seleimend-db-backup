@@ -35,16 +35,17 @@ log_error() {
 notify_healthcheck() {
   local state="${1:-}"
   local msg="${2:-}"
-  if [[ -n "${HEALTHCHECK_URL:-}" ]]; then
+  local target_url="${3:-${HEALTHCHECK_URL:-}}"
+  if [[ -n "${target_url}" ]]; then
     case "${state}" in
       start)
-        curl -fsS -m 10 --retry 3 "${HEALTHCHECK_URL}/start" > /dev/null 2>&1 || true
+        curl -fsS -m 10 --retry 3 "${target_url}/start" > /dev/null 2>&1 || true
         ;;
       success)
-        curl -fsS -m 10 --retry 3 --data-raw "${msg}" "${HEALTHCHECK_URL}" > /dev/null 2>&1 || true
+        curl -fsS -m 10 --retry 3 --data-raw "${msg}" "${target_url}" > /dev/null 2>&1 || true
         ;;
       fail)
-        curl -fsS -m 10 --retry 3 --data-raw "${msg}" "${HEALTHCHECK_URL}/fail" > /dev/null 2>&1 || true
+        curl -fsS -m 10 --retry 3 --data-raw "${msg}" "${target_url}/fail" > /dev/null 2>&1 || true
         ;;
       *) ;;
 

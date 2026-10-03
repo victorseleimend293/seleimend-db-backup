@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seleimend-db-backup
+  namespace: default
+  labels:
+    app.kubernetes.io/name: seleimend-db-backup
+    app.kubernetes.io/part-of: seleimend-infrastructure
+    app.kubernetes.io/component: backup-and-dr
+spec:
+  replicas: 1
+  # Recreate strategy ensures only one backup daemon runs at a time during rollouts
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: seleimend-db-backup
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: seleimend-db-backup
+    spec:
+      restartPolicy: Always
+      # Security: Run as non-root user (UID 10001)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backup-agent
+          image: ghcr.io/victorseleimend293/seleimend-db-backup:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          envFrom:
+            - secretRef:
+                name: seleimend-db-backup-secret
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 1Gi

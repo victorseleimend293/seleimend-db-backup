@@ -14,6 +14,7 @@
     "test:commitlint": "node test/commitlint.test.mjs",
     "test": "pnpm run test:commitlint && pnpm run test:bats",
     "test:coverage": "bash test/run_coverage.sh",
+    "test:dr": "bash test/disaster_recovery.sh",
     "release": "semantic-release"
   },
   "devDependencies": {

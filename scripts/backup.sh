@@ -52,24 +52,6 @@ pg_dump "${DUMP_TARGET[@]}" \
 log_info "Checking uploaded object metadata on B2..."
 aws --endpoint-url="${B2_ENDPOINT}" s3 ls "${DESTINATION}"
 
-# Optional Retention Cleanup
-RETENTION_DAYS="${RETENTION_DAYS:-0}"
-if [[ "${RETENTION_DAYS}" -gt 0 ]]; then
-  log_info "Pruning snapshots older than ${RETENTION_DAYS} days in s3://${B2_BUCKET}/${B2_PREFIX}/..."
-  CUTOFF_TIMESTAMP="$(date -u -d "${RETENTION_DAYS} days ago" +"%Y%m%d_%H%M%SZ" 2> /dev/null || date -u -v-"${RETENTION_DAYS}"d +"%Y%m%d_%H%M%SZ")"
-
-  aws --endpoint-url="${B2_ENDPOINT}" s3 ls "s3://${B2_BUCKET}/${B2_PREFIX}/" | while read -r line; do
-    OBJ_FILE=$(echo "${line}" | awk '{print $4}')
-    if [[ "${OBJ_FILE}" =~ ^${IDENTIFIER}_([0-9]{8}_[0-9]{6}Z)\.dump$ ]]; then
-      FILE_TIMESTAMP="${BASH_REMATCH[1]}"
-      if [[ "${FILE_TIMESTAMP}" < "${CUTOFF_TIMESTAMP}" ]]; then
-        log_info "Deleting expired snapshot: ${OBJ_FILE}"
-        aws --endpoint-url="${B2_ENDPOINT}" s3 rm "s3://${B2_BUCKET}/${B2_PREFIX}/${OBJ_FILE}"
-      fi
-    fi
-  done
-fi
-
 SUCCESS_MSG="Successfully backed up ${IDENTIFIER} to ${DESTINATION} at $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 log_success "${SUCCESS_MSG}"
 notify_healthcheck "success" "${SUCCESS_MSG}"

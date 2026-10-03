@@ -16,7 +16,7 @@ export COVERAGE_MODE=1
 export COVERAGE_TRACE_FILE="${COVERAGE_DIR}/trace.log"
 
 echo "==> Running Bats test suite with line execution tracking..."
-pnpm exec bats test/common.bats test/backup.bats test/restore.bats test/entrypoint.bats
+pnpm exec bats test/common.bats test/backup.bats test/restore.bats test/entrypoint.bats test/dr_test.bats test/provision_b2.bats
 
 echo "==> Analyzing coverage against 100% threshold..."
 node test/analyze_coverage.mjs

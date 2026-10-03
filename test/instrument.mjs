@@ -7,7 +7,21 @@ const destDir = path.join(projectRoot, 'test', 'coverage', 'instrumented', 'scri
 
 fs.mkdirSync(destDir, { recursive: true });
 
-const scriptFiles = ['common.sh', 'backup.sh', 'restore.sh', 'entrypoint.sh'];
+const tfSrc = path.join(projectRoot, 'terraform');
+const tfDest = path.join(projectRoot, 'test', 'coverage', 'instrumented', 'terraform');
+if (fs.existsSync(tfSrc)) {
+  fs.cpSync(tfSrc, tfDest, { recursive: true });
+}
+
+const scriptFiles = [
+  'common.sh',
+  'backup.sh',
+  'restore.sh',
+  'entrypoint.sh',
+  'dr_test.sh',
+  'provision_b2.sh',
+];
+
 const metadata = {};
 
 for (const file of scriptFiles) {

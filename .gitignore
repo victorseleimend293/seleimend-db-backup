@@ -9,10 +9,18 @@ k8s/secret.yaml
 
 # Backups and dump artifacts
 *.dump
+*.dump.enc
 *.sql
 *.sql.gz
 *.sql.zst
 *.tar.gz
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
 
 # OS and editor files
 .DS_Store

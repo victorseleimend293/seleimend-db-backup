@@ -9,11 +9,12 @@ LABEL org.opencontainers.image.title="seleimend-db-backup" \
 
 ARG TARGETARCH
 ARG SUPERCRONIC_VERSION=v0.2.33
+ARG TERRAFORM_VERSION=1.9.8
 
 # Install runtime dependencies:
 # - postgresql17-client: pg_dump, pg_restore, pg_isready
 # - aws-cli: S3-compatible streaming multipart uploads to Backblaze B2
-# - zstd, gzip, coreutils, curl, ca-certificates, bash, shadow
+# - zstd, gzip, coreutils, curl, ca-certificates, bash, shadow, unzip
 RUN apk add --no-cache \
         bash \
         curl \
@@ -24,6 +25,7 @@ RUN apk add --no-cache \
         zstd \
         gzip \
         shadow \
+        unzip \
     && case "${TARGETARCH:-amd64}" in \
         amd64) ARCH="amd64" ;; \
         arm64) ARCH="arm64" ;; \
@@ -31,7 +33,11 @@ RUN apk add --no-cache \
         *) ARCH="amd64" ;; \
     esac \
     && curl -fsSL "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-${ARCH}" -o /usr/local/bin/supercronic \
-    && chmod +x /usr/local/bin/supercronic
+    && chmod +x /usr/local/bin/supercronic \
+    && curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip" -o /tmp/terraform.zip \
+    && unzip /tmp/terraform.zip -d /usr/local/bin \
+    && rm -f /tmp/terraform.zip /usr/local/bin/LICENSE.txt \
+    && chmod +x /usr/local/bin/terraform
 
 # Create a dedicated non-root user and group
 ENV USER=backup \
@@ -45,10 +51,12 @@ RUN addgroup -g ${GID} ${USER} \
 
 WORKDIR /scripts
 
-# Copy scripts and set permissions
+# Copy scripts and terraform template
 COPY --chown=${USER}:${USER} scripts/ /scripts/
+COPY --chown=${USER}:${USER} terraform/ /scripts/terraform/
 
-RUN chmod +x /scripts/*.sh
+RUN chmod +x /scripts/*.sh \
+    && cd /scripts/terraform && terraform init -backend=false
 
 USER ${USER}
 

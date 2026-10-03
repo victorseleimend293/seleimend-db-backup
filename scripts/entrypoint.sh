@@ -16,11 +16,16 @@ if [[ $# -gt 0 ]]; then
   case "$1" in
     backup)
       shift
+      "${SCRIPT_DIR}/provision_b2.sh"
       exec "${SCRIPT_DIR}/backup.sh" "$@"
       ;;
     restore)
       shift
       exec "${SCRIPT_DIR}/restore.sh" "$@"
+      ;;
+    dr-test | test-dr)
+      shift
+      exec "${SCRIPT_DIR}/dr_test.sh" "$@"
       ;;
     *)
       exec "$@"
@@ -28,13 +33,26 @@ if [[ $# -gt 0 ]]; then
   esac
 fi
 
-# If CRON_SCHEDULE is defined, run as a daemon using supercronic
-if [[ -n "${CRON_SCHEDULE:-}" ]]; then
-  log_info "CRON_SCHEDULE is defined: '${CRON_SCHEDULE}'"
+# Run B2 auto-provisioning
+"${SCRIPT_DIR}/provision_b2.sh"
+
+# If CRON_SCHEDULE or DR_SCHEDULE is defined, run as a daemon using supercronic
+if [[ -n "${CRON_SCHEDULE:-}" ]] || [[ -n "${DR_SCHEDULE:-}" ]]; then
   log_info "Initializing supercronic daemon mode..."
 
   CRONTAB_FILE="/tmp/crontab"
-  echo "${CRON_SCHEDULE} ${SCRIPT_DIR}/backup.sh" > "${CRONTAB_FILE}"
+  rm -f "${CRONTAB_FILE}"
+  touch "${CRONTAB_FILE}"
+
+  if [[ -n "${CRON_SCHEDULE:-}" ]]; then
+    log_info "Configuring backup schedule: '${CRON_SCHEDULE}'"
+    echo "${CRON_SCHEDULE} ${SCRIPT_DIR}/backup.sh" >> "${CRONTAB_FILE}"
+  fi
+
+  if [[ -n "${DR_SCHEDULE:-}" ]]; then
+    log_info "Configuring disaster recovery drill schedule: '${DR_SCHEDULE}'"
+    echo "${DR_SCHEDULE} ${SCRIPT_DIR}/dr_test.sh" >> "${CRONTAB_FILE}"
+  fi
 
   log_info "Starting supercronic with crontab:"
   cat "${CRONTAB_FILE}"
@@ -42,5 +60,5 @@ if [[ -n "${CRON_SCHEDULE:-}" ]]; then
 fi
 
 # Default: execute a single backup run and exit (Kubernetes CronJob pattern)
-log_info "No CRON_SCHEDULE specified. Running single backup execution..."
+log_info "No schedule specified. Running single backup execution..."
 exec "${SCRIPT_DIR}/backup.sh"

@@ -123,3 +123,4 @@ EOF
   assert_failure 1
   assert_output --partial "Option --file requires a filename argument"
 }
+

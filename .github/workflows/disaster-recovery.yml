@@ -1,0 +1,140 @@
+name: Disaster Recovery Drill
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Run automated disaster recovery test weekly on Sunday at 04:00 UTC
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  disaster-recovery-drill:
+    name: End-to-End Disaster Recovery Drill
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: disaster_source_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: miniopassword
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        command: server /data
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build local container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: seleimend-db-backup:dr-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Set up MinIO S3 bucket
+        env:
+          AWS_ACCESS_KEY_ID: minioadmin
+          AWS_SECRET_ACCESS_KEY: miniopassword
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://disaster-recovery-bucket
+
+      - name: Seed primary database with schema and sample data
+        run: |
+          docker run --rm --network host \
+            -e PGPASSWORD=test_password \
+            postgres:17-alpine \
+            psql -h 127.0.0.1 -p 5432 -U test_user -d disaster_source_db << 'EOF'
+              CREATE TABLE users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+              );
+
+              CREATE TABLE audit_logs (
+                id SERIAL PRIMARY KEY,
+                user_id INT REFERENCES users(id),
+                action VARCHAR(100) NOT NULL,
+                logged_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+              );
+
+              INSERT INTO users (username, email) VALUES
+                ('alice', 'alice@example.com'),
+                ('bob', 'bob@example.com'),
+                ('carol', 'carol@example.com');
+
+              INSERT INTO audit_logs (user_id, action) VALUES
+                (1, 'USER_LOGIN'),
+                (2, 'PASSWORD_CHANGE'),
+                (3, 'ACCOUNT_CREATED');
+          EOF
+
+      - name: Execute streaming backup to object storage
+        run: |
+          docker run --rm --network host \
+            -e AUTO_PROVISION_B2="false" \
+            -e B2_ENDPOINT="http://127.0.0.1:9000" \
+            -e B2_APPLICATION_KEY_ID="minioadmin" \
+            -e B2_APPLICATION_KEY="miniopassword" \
+            -e B2_BUCKET="disaster-recovery-bucket" \
+            -e B2_PREFIX="automated-dr" \
+            -e DATABASE_URL="postgresql://test_user:test_password@127.0.0.1:5432/disaster_source_db" \
+            seleimend-db-backup:dr-test backup
+
+      - name: Verify backup snapshot in object storage
+        env:
+          AWS_ACCESS_KEY_ID: minioadmin
+          AWS_SECRET_ACCESS_KEY: miniopassword
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          SNAPSHOTS=$(aws --endpoint-url http://127.0.0.1:9000 s3 ls s3://disaster-recovery-bucket/automated-dr/)
+          echo "Found snapshots in bucket:"
+          echo "${SNAPSHOTS}"
+          echo "${SNAPSHOTS}" | grep -E "disaster_source_db_[0-9]{8}_[0-9]{6}Z\.dump"
+
+      - name: Execute automated disaster recovery drill (Auto-create test DB, restore, verify, teardown)
+        run: |
+          docker run --rm --network host \
+            -e AUTO_PROVISION_B2="false" \
+            -e B2_ENDPOINT="http://127.0.0.1:9000" \
+            -e B2_APPLICATION_KEY_ID="minioadmin" \
+            -e B2_APPLICATION_KEY="miniopassword" \
+            -e B2_BUCKET="disaster-recovery-bucket" \
+            -e B2_PREFIX="automated-dr" \
+            -e DATABASE_URL="postgresql://test_user:test_password@127.0.0.1:5432/disaster_source_db" \
+            -e DR_VERIFY_QUERY="SELECT count(*) FROM users WHERE email = 'alice@example.com';" \
+            seleimend-db-backup:dr-test dr-test --latest
