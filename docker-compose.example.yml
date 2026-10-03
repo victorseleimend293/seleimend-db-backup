@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: test-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: seleimend_user
+      POSTGRES_PASSWORD: secret_password
+      POSTGRES_DB: app_database
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seleimend_user -d app_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db-backup:
+    image: ghcr.io/victorseleimend293/seleimend-db-backup:latest
+    container_name: seleimend-db-backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Daemon mode: run cron every night at 2:00 AM UTC
+      CRON_SCHEDULE: "0 2 * * *"
+
+      # Database connection
+      DATABASE_URL: "postgresql://seleimend_user:secret_password@postgres:5432/app_database"
+
+      # Backblaze B2 S3 API configuration
+      B2_ENDPOINT: "s3.us-west-004.backblazeb2.com"
+      B2_APPLICATION_KEY_ID: "${B2_APPLICATION_KEY_ID}"
+      B2_APPLICATION_KEY: "${B2_APPLICATION_KEY}"
+      B2_BUCKET: "${B2_BUCKET}"
+      B2_PREFIX: "compose-dev/postgres"
+      RETENTION_DAYS: "14"
+      # HEALTHCHECK_URL: "https://hc-ping.com/your-uuid"
+
+volumes:
+  postgres_data:
