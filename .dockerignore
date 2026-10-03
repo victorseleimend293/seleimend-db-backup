@@ -8,3 +8,12 @@ docker-compose*.yml
 .env*
 *.dump
 *.sql*
+node_modules/
+coverage/
+test/
+.husky/
+package*.json
+.prettier*
+.shellcheckrc
+commitlint.config.*
+.releaserc*

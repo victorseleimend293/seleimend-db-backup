@@ -24,3 +24,9 @@ Thumbs.db
 
 # Docker / Compose state
 .docker/
+
+# Node, dependencies, and test coverage
+node_modules/
+coverage/
+.husky/_/
+test/tmp/

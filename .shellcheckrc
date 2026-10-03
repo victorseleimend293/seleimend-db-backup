@@ -1,0 +1,4 @@
+# ShellCheck configuration file
+shell=bash
+enable=all
+disable=SC1091,SC2312

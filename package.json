@@ -1,0 +1,35 @@
+{
+  "name": "seleimend-db-backup",
+  "version": "1.0.0",
+  "description": "Enterprise-ready containerized PostgreSQL streaming backup agent for Backblaze B2 (S3-compatible)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:shell": "shellcheck scripts/*.sh",
+    "lint": "pnpm run lint:shell && pnpm run format:check",
+    "test:bats": "bats test/*.bats",
+    "test:commitlint": "node test/commitlint.test.mjs",
+    "test": "pnpm run test:commitlint && pnpm run test:bats",
+    "test:coverage": "bash test/run_coverage.sh",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
+    "bats": "^1.11.1",
+    "bats-assert": "^2.0.0",
+    "bats-support": "^0.3.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.2",
+    "prettier-plugin-sh": "^0.15.0",
+    "semantic-release": "^24.2.3",
+    "shellcheck": "^4.1.0"
+  },
+  "license": "MIT"
+}

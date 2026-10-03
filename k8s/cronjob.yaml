@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: backup
 spec:
   # Run daily at 02:00 UTC
-  schedule: "0 2 * * *"
+  schedule: '0 2 * * *'
   # Never run multiple backup jobs concurrently
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
@@ -37,7 +37,7 @@ spec:
             - name: backup
               image: ghcr.io/victorseleimend293/seleimend-db-backup:latest
               imagePullPolicy: IfNotPresent
-              args: ["backup"]
+              args: ['backup']
               resources:
                 requests:
                   cpu: 100m

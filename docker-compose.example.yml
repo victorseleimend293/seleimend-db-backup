@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U seleimend_user -d app_database"]
+      test: ['CMD-SHELL', 'pg_isready -U seleimend_user -d app_database']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,18 +24,18 @@ services:
         condition: service_healthy
     environment:
       # Daemon mode: run cron every night at 2:00 AM UTC
-      CRON_SCHEDULE: "0 2 * * *"
+      CRON_SCHEDULE: '0 2 * * *'
 
       # Database connection
-      DATABASE_URL: "postgresql://seleimend_user:secret_password@postgres:5432/app_database"
+      DATABASE_URL: 'postgresql://seleimend_user:secret_password@postgres:5432/app_database'
 
       # Backblaze B2 S3 API configuration
-      B2_ENDPOINT: "s3.us-west-004.backblazeb2.com"
-      B2_APPLICATION_KEY_ID: "${B2_APPLICATION_KEY_ID}"
-      B2_APPLICATION_KEY: "${B2_APPLICATION_KEY}"
-      B2_BUCKET: "${B2_BUCKET}"
-      B2_PREFIX: "compose-dev/postgres"
-      RETENTION_DAYS: "14"
+      B2_ENDPOINT: 's3.us-west-004.backblazeb2.com'
+      B2_APPLICATION_KEY_ID: '${B2_APPLICATION_KEY_ID}'
+      B2_APPLICATION_KEY: '${B2_APPLICATION_KEY}'
+      B2_BUCKET: '${B2_BUCKET}'
+      B2_PREFIX: 'compose-dev/postgres'
+      RETENTION_DAYS: '14'
       # HEALTHCHECK_URL: "https://hc-ping.com/your-uuid"
 
 volumes:

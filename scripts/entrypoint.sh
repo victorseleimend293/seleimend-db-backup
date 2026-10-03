@@ -8,15 +8,19 @@ set -euo pipefail
 # scheduled daemon execution (via supercronic for Docker Compose).
 # ==============================================================================
 
-if [ $# -gt 0 ]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/common.sh
+source "${SCRIPT_DIR}/common.sh"
+
+if [[ $# -gt 0 ]]; then
   case "$1" in
     backup)
       shift
-      exec /scripts/backup.sh "$@"
+      exec "${SCRIPT_DIR}/backup.sh" "$@"
       ;;
     restore)
       shift
-      exec /scripts/restore.sh "$@"
+      exec "${SCRIPT_DIR}/restore.sh" "$@"
       ;;
     *)
       exec "$@"
@@ -25,18 +29,18 @@ if [ $# -gt 0 ]; then
 fi
 
 # If CRON_SCHEDULE is defined, run as a daemon using supercronic
-if [ -n "${CRON_SCHEDULE:-}" ]; then
-  echo "==> [Entrypoint] CRON_SCHEDULE is defined: '${CRON_SCHEDULE}'"
-  echo "==> [Entrypoint] Initializing supercronic daemon mode..."
+if [[ -n "${CRON_SCHEDULE:-}" ]]; then
+  log_info "CRON_SCHEDULE is defined: '${CRON_SCHEDULE}'"
+  log_info "Initializing supercronic daemon mode..."
 
   CRONTAB_FILE="/tmp/crontab"
-  echo "${CRON_SCHEDULE} /scripts/backup.sh" > "${CRONTAB_FILE}"
+  echo "${CRON_SCHEDULE} ${SCRIPT_DIR}/backup.sh" > "${CRONTAB_FILE}"
 
-  echo "==> [Entrypoint] Starting supercronic with crontab:"
+  log_info "Starting supercronic with crontab:"
   cat "${CRONTAB_FILE}"
   exec supercronic "${CRONTAB_FILE}"
 fi
 
 # Default: execute a single backup run and exit (Kubernetes CronJob pattern)
-echo "==> [Entrypoint] No CRON_SCHEDULE specified. Running single backup execution..."
-exec /scripts/backup.sh
+log_info "No CRON_SCHEDULE specified. Running single backup execution..."
+exec "${SCRIPT_DIR}/backup.sh"

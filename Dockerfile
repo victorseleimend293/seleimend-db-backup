@@ -46,9 +46,7 @@ RUN addgroup -g ${GID} ${USER} \
 WORKDIR /scripts
 
 # Copy scripts and set permissions
-COPY --chown=${USER}:${USER} scripts/entrypoint.sh /scripts/entrypoint.sh
-COPY --chown=${USER}:${USER} scripts/backup.sh /scripts/backup.sh
-COPY --chown=${USER}:${USER} scripts/restore.sh /scripts/restore.sh
+COPY --chown=${USER}:${USER} scripts/ /scripts/
 
 RUN chmod +x /scripts/*.sh
 
