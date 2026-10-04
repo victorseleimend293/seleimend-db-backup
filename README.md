@@ -17,6 +17,11 @@ An enterprise-ready, containerized PostgreSQL backup agent that streams compress
 
 ## Architecture Overview
 
+![Architecture Diagram](https://raw.githubusercontent.com/victorseleimend293/seleimend-db-backup/main/assets/architecture.svg)
+
+<details>
+<summary>View Mermaid Source</summary>
+
 ```mermaid
 flowchart TD
     subgraph ContainerService ["Consolidated Single Service (Docker Compose / Kubernetes Deployment)"]
@@ -61,6 +66,8 @@ flowchart TD
     style PostgresEnv fill:#e1f5fe,stroke:#03a9f4
     style Monitoring fill:#ffebee,stroke:#f44336
 ```
+
+</details>
 
 ---
 
