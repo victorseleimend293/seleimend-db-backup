@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## <small>1.1.2 (2026-10-04)</small>
+
+* fix(ci): pass interactive stdin to psql in database seeding step ([2a3332c](https://github.com/victorseleimend293/seleimend-db-backup/commit/2a3332c))
+
 ## <small>1.1.1 (2026-10-04)</small>
 
 * fix(ci): fix S3 test container, terraform warning and dockerhub metadata ([d6849b1](https://github.com/victorseleimend293/seleimend-db-backup/commit/d6849b1))
