@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## <small>1.1.3 (2026-10-04)</small>
+
+* fix(security): resolve Docker Scout vulnerabilities by updating base image and binaries ([e5bcddd](https://github.com/victorseleimend293/seleimend-db-backup/commit/e5bcddd))
+* docs(readme): render architecture diagram as SVG for Docker Hub compatibility ([af3cf02](https://github.com/victorseleimend293/seleimend-db-backup/commit/af3cf02))
+
 ## <small>1.1.2 (2026-10-04)</small>
 
 * fix(ci): pass interactive stdin to psql in database seeding step ([2a3332c](https://github.com/victorseleimend293/seleimend-db-backup/commit/2a3332c))
