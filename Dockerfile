@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM alpine:3.21
+FROM alpine:3.24
 
 LABEL org.opencontainers.image.title="seleimend-db-backup" \
       org.opencontainers.image.description="Enterprise-ready containerized PostgreSQL streaming backup agent for Backblaze B2 (S3-compatible)" \
@@ -8,13 +8,13 @@ LABEL org.opencontainers.image.title="seleimend-db-backup" \
       org.opencontainers.image.source="https://github.com/victorseleimend293/seleimend-db-backup"
 
 ARG TARGETARCH
-ARG SUPERCRONIC_VERSION=v0.2.33
-ARG TERRAFORM_VERSION=1.9.8
+ARG SUPERCRONIC_VERSION=v0.2.49
+ARG TERRAFORM_VERSION=1.16.5
 
 # Install runtime dependencies:
 # - postgresql17-client: pg_dump, pg_restore, pg_isready
 # - aws-cli: S3-compatible streaming multipart uploads to Backblaze B2
-# - zstd, gzip, coreutils, curl, ca-certificates, bash, shadow, unzip
+# - zstd, gzip, coreutils, curl, ca-certificates, bash, shadow
 RUN apk add --no-cache \
         bash \
         curl \
@@ -25,7 +25,6 @@ RUN apk add --no-cache \
         zstd \
         gzip \
         shadow \
-        unzip \
     && case "${TARGETARCH:-amd64}" in \
         amd64) ARCH="amd64" ;; \
         arm64) ARCH="arm64" ;; \
