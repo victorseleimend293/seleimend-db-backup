@@ -14,7 +14,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/common.sh
 source "${SCRIPT_DIR}/common.sh"
 
-DR_HEALTHCHECK_URL="${DR_HEALTHCHECK_URL:-${HEALTHCHECK_URL:-}}"
 TARGET_FILE=""
 ACTION="latest"
 
@@ -33,7 +32,6 @@ Environment Variables:
   DR_VERIFY_QUERY       (required: SQL query asserting restored database validity)
   DR_DATABASE_URL       (optional: explicit test database URL instead of auto-creation)
   HEALTHCHECK_URL       (optional: webhook URL for start/fail/success alerts)
-  DR_HEALTHCHECK_URL    (optional: dedicated webhook URL for DR alerts)
 EOF
   exit 1
 }
@@ -75,7 +73,7 @@ cleanup() {
   if [[ ${exit_code} -ne 0 ]]; then
     local err_msg="Disaster recovery drill failed for ${IDENTIFIER:-database} with exit code ${exit_code}"
     log_error "${err_msg}"
-    notify_healthcheck "fail" "${err_msg}" "${DR_HEALTHCHECK_URL}"
+    notify_healthcheck "fail" "${err_msg}"
   fi
   exit "${exit_code}"
 }
@@ -83,7 +81,7 @@ cleanup() {
 trap 'cleanup $?' EXIT INT TERM
 
 log_info "Starting automated disaster recovery drill..."
-notify_healthcheck "start" "" "${DR_HEALTHCHECK_URL}"
+notify_healthcheck "start"
 
 # Initialize configurations
 init_b2_config
@@ -158,4 +156,4 @@ psql "${TEST_DB_URL}" -c "${DR_VERIFY_QUERY}"
 
 SUCCESS_MSG="Disaster recovery drill passed successfully! Snapshot ${TARGET_FILE} verified with ${TABLE_COUNT} table(s)."
 log_success "${SUCCESS_MSG}"
-notify_healthcheck "success" "${SUCCESS_MSG}" "${DR_HEALTHCHECK_URL}"
+notify_healthcheck "success" "${SUCCESS_MSG}"
