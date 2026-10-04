@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## <small>1.1.1 (2026-10-04)</small>
+
+* fix(ci): fix S3 test container, terraform warning and dockerhub metadata ([d6849b1](https://github.com/victorseleimend293/seleimend-db-backup/commit/d6849b1))
+
 ## 1.1.0 (2026-10-03)
 
 * feat(dr): add disaster recovery drills, b2 terraform and unified deployment ([56f49e4](https://github.com/victorseleimend293/seleimend-db-backup/commit/56f49e4))

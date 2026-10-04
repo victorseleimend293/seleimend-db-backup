@@ -1,6 +1,6 @@
 {
   "name": "seleimend-db-backup",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Enterprise-ready containerized PostgreSQL streaming backup agent for Backblaze B2 (S3-compatible)",
   "private": true,
   "type": "module",
