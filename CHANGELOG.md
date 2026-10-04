@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## <small>1.1.4 (2026-10-04)</small>
+
+* refactor(dr): remove obsolete DR_HEALTHCHECK_URL references ([1262a85](https://github.com/victorseleimend293/seleimend-db-backup/commit/1262a85))
+
 ## <small>1.1.3 (2026-10-04)</small>
 
 * fix(security): resolve Docker Scout vulnerabilities by updating base image and binaries ([e5bcddd](https://github.com/victorseleimend293/seleimend-db-backup/commit/e5bcddd))
