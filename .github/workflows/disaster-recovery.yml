@@ -74,7 +74,7 @@ jobs:
 
       - name: Seed primary database with schema and sample data
         run: |
-          docker run --rm --network host \
+          docker run -i --rm --network host \
             -e PGPASSWORD=test_password \
             postgres:17-alpine \
             psql -h 127.0.0.1 -p 5432 -U test_user -d disaster_source_db << 'EOF'
